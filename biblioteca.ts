@@ -1,5 +1,4 @@
 // Considere um sistema de gerenciamento de biblioteca. Aqui estão alguns requisitos:
-
 // Cada livro tem um título, autor, número de páginas e um identificador único.
 // Cada usuário tem um nome, endereço, data de nascimento e um conjunto de livros que eles pegaram emprestado.
 // A biblioteca tem um conjunto de livros disponíveis e um conjunto de usuários registrados.
@@ -9,143 +8,97 @@
 // Em seguida, adicione métodos para pegar um livro emprestado e devolver um livro.
 
 
-
 class Livro{
-    static ultimoId = 0
-    titulo:string
+    static ultimoID = 0
+    titulo: string
     autor: string
-    paginas: number
+    Npaginas: number
     id: number
+
+    static proximoID(){
+        Livro.ultimoID += 1
+        return  Livro.ultimoID
+    }
 
     constructor(
         titulo: string,
         autor: string,
-        paginas:number
+        Npaginas: number,
+        id: number
     ){
         this.titulo = titulo
         this.autor = autor
-        this.paginas = paginas
-        this.id = Livro.getProximoId()
+        this.Npaginas = Npaginas
+        this.id = Livro.proximoID()
     }
-
-    static getProximoId() {
-        Livro.ultimoId += 1
-        return Livro.ultimoId
-    }
-
 }
 
 interface End{
     cidade:string
     bairro:string
     numero:number
-}
-enum Genero{
-    masc,
-    fem
-}
+} 
 
-class Usuario{
+class User{
     nome:string
-    endereco:End
-    dataNasc: string
-    livros: Livro[]
-    gender: Genero
+    endereco: End
+    dataNasc:Date
+    livro: Livro[]
 
     constructor(
         nome:string,
-        endereco:End,
-        dataNasc: string,
-        livros: Livro[],
-        gender: Genero
+        endereco: End,
+        dataNasc:Date,
+        livro: Livro[]
     ){
         this.nome = nome
         this.endereco = endereco
         this.dataNasc = dataNasc
-        this.livros = []
-        this.gender = gender
+        this.livro = livro
     }
-
 }
 
 class Biblioteca{
-    livros:Livro[]
-    usuario: Usuario[]
+    usuario: User[]
+    livro: Livro[]
+    registroLivros: Livro[]
 
-    constructor(livros: Livro[], usuario: Usuario[]) {
-        this.livros = livros;
-        this.usuario = usuario;
+    constructor(
+        usuario: User[],
+        livro: Livro[]
+    ){
+        this.usuario = usuario
+        this.livro = livro
+        this.registroLivros = [...livro]
     }
-    
-    adicionarLivro(livros: Livro[]):void {
-        for (let livro of livros) {
-            this.livros.push(livro);
-        }
-    }
-    
 
-    adicionarUsuario(usuario: Usuario[]):void{
-        for(let usuario of usuarios){
-        this.usuario.push(usuario)
-        }
+    adicionarUser(newUser: User):void{
+        this.usuario.push(newUser)  
     }
-    
-
-    pegarLivro(livro: Livro, usuario: Usuario):void {
-        // Encontre o índice do livro na lista de livros da biblioteca
-        const index = this.livros.findIndex(l => l.id === livro.id);   //Este é um método de array que aceita uma função de callback e retorna o índice do primeiro elemento no array que satisfaz a condição fornecida pela função de callback. Se nenhum elemento satisfizer a condição, ele retorna -1.
-    
-        // Verifique se o livro está disponível na biblioteca
-        if (index !== -1) {   //(index === 1) significa que esta presente e o usuario pode pegalo
-            // Adicione o livro à lista de livros do usuário
-            usuario.livros.push(livro);
-    
-            // Remova o livro da lista de livros da biblioteca
-            this.livros.splice(index, 1);
-        } else {
-            console.log('Livro não disponível');
-        }
+    adicionarLivro(newLivro: Livro):void{
+        this.livro.push(newLivro)
     }
-    devolveLivro(livro: Livro, usuario: Usuario): void{
-        const index = this.livros.findIndex(l => l.id === livro.id);  //variavel criada denovo pois aquela esta naquele escopo
-        if (index !== -1) {
-            usuario.livros.splice(index,1)
-            this.livros.push(livro)
-            console.log('Livro devolvido!')
+    emprestarLivro(livro: Livro, usuario:User):void{
+        let index = this.livro.findIndex(l => l.titulo === livro.titulo)
+        if(index !== -1){
+            usuario.livro.push(livro)
+            this.livro.splice(index ,1)
         }else{
-            console.log("Livro não encontrado na lista de livros do usuário")
+            alert("O livro nao esta presente na biblioteca!")
         }
-
     }
+    verificarLivro(livro: Livro): boolean {
+        return this.registroLivros.some(l => l.id === livro.id)
+    }
+
+    receberLivro(livro: Livro, usuario:User):void{
+        let indexUser = usuario.livro.findIndex(l => l.titulo === livro.titulo)
+        if(indexUser !== -1 && this.verificarLivro(livro)){
+            this.livro.push(livro)
+            usuario.livro.splice(indexUser ,1)
+        }else{
+            alert("Este livro não faz parte do registro da biblioteca.")
+        }
+    }
+
 }
-
-let biblioteca = new Biblioteca([], []);
-
-let livro1 = new Livro('terror no mar', 'napoleao', 200)
-let livro2 = new Livro('terror na floresta', 'napoleao', 220)
-let livro3 = new Livro('terror na cidade', 'napoleao', 210)
-
-
-
-let endereco1: End = {
-    cidade: 'Nova Friburgo',
-    bairro: 'Braunes',
-    numero:192
-}
-
-
-
-let felipe = new Usuario('Felipe', endereco1, '09/02/1992', [], Genero.masc)
-let nat = new Usuario('Nat', endereco1, '24/12/1990', [], Genero.masc)
-let beni = new Usuario('Beni', endereco1, '30/09/2019', [], Genero.masc)
-
-
-let livros = [livro1, livro2, livro3];
-let usuarios = [felipe, nat, beni]
-
-
-
-
-biblioteca.adicionarLivro(livros);
-biblioteca.adicionarUsuario(usuarios);
-
